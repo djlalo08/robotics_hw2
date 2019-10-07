@@ -21,7 +21,7 @@ def odom_callback(msg):
 
 '''
 def odom_callback(msg):
-    global botPos, yaw_
+    global botPos, yaw
 
     # position
     botPos = msg.pose.pose.position
@@ -33,7 +33,7 @@ def odom_callback(msg):
         msg.pose.pose.orientation.z,
         msg.pose.pose.orientation.w)
     euler = transformations.euler_from_quaternion(quaternion)
-    yaw_ = euler[2]
+    yaw = euler[2]
     
 #-------------------------------------------------calculates bot distance to line----------------------------------
 def distance_to_line(p0):
@@ -57,13 +57,17 @@ initPos = Point()
 initPos.x = 0
 initPos.y = 0
 initPos.z = 0
+
 #goal position 
 gPosition = Point()
 gPosition.x = 10
 gPosition.y = 0 
 gPosition.z = 0
-#for oritentation? 
+
+#robot angle 
 yaw = 0
+
+#laser-reading
 g_range_ahead = 0
 
 #what state we are in
@@ -94,9 +98,11 @@ def main():
     while not rospy.is_shutdown():
 
         distance_position_to_line = distance_to_line(botPos)
-
+        twist = Twist()
+        twist.linear.x = 0
+        twist.angular.z = 0
+        
         if state == 0:# we go to the point
-            twist = Twist()
             twist.linear.x = 1
             cmd_vel.publish(twist)
             print(botPos)
@@ -110,15 +116,11 @@ def main():
             if(g_range_ahead <1):
                 while(g_range_ahead < 1):
                     print("range ahead: " + str(g_range_ahead))
-                    twist = Twist()
                     twist.angular.z = 1
-                    cmd_vel.publish(twist)
                             
             #move forward until closer
             for i in range(0,3):
-                twist = Twist()
                 twist.linear.x = 1
-                cmd_vel.publish(twist)
                 print(botPos)
                 print("range ahead: " + str(g_range_ahead))
                 print("yaw is: " + str(yaw))
@@ -127,13 +129,13 @@ def main():
             if(g_range_ahead >1):
                 while(g_range_ahead > 1):
                     print("range ahead: " + str(g_range_ahead))
-                    twist = Twist()
                     twist.angular.z = -1
-                    cmd_vel.publish(twist)
 
             #puts us back to following mline 
             if distance_to_line(botPos) > -.2 or distance_to_line(botPos) < .2:
                 state = 0
+        
+        cmd_vel.publish(twist)
         
         count_loop_ = count_loop_ + 1
         if count_loop_ == 20:
