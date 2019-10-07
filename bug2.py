@@ -126,10 +126,9 @@ def main():
                 print("yaw is: " + str(yaw))
 
             #to turn right to find a wall if at a corner
-            if(g_range_ahead >1):
-                while(g_range_ahead > 1):
-                    print("range ahead: " + str(g_range_ahead))
-                    twist.angular.z = -1
+            while(g_range_ahead > 1):
+                print("range ahead: " + str(g_range_ahead))
+                twist.angular.z = -1
 
             #puts us back to following mline 
             if distance_to_line(botPos) > -.2 or distance_to_line(botPos) < .2:
