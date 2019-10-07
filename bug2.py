@@ -8,11 +8,6 @@ import math
 from tf import transformations
 
 
-
-
-
-
-
 #------------------------------------------------- callbacks -------------------------------------------------------
 #returns distance from obstacle
 def scan_callback(msg):
@@ -39,9 +34,8 @@ def odom_callback(msg):
         msg.pose.pose.orientation.w)
     euler = transformations.euler_from_quaternion(quaternion)
     yaw_ = euler[2]
-
     
-#-------------------------------------------------calcualtes bot distance to line----------------------------------
+#-------------------------------------------------calculates bot distance to line----------------------------------
 def distance_to_line(p0):
     # p0 is the current position
     # p1 and p2 points define the line
@@ -57,17 +51,12 @@ def distance_to_line(p0):
     return distance
 
 
-
-
-
-
-
 #our position
 botPos = Point()
 initPos = Point()
 initPos.x = 0
 initPos.y = 0
-initPos.z=0
+initPos.z = 0
 #goal position 
 gPosition = Point()
 gPosition.x = 10
@@ -83,7 +72,6 @@ state = 0
 #1:----wall follow
 
 
-
 #point that we will need---if impossible 
 circumnavigate_starting_point_ = Point()
 
@@ -94,15 +82,13 @@ def main():
     global state, count_loop_, count_state_time_, g_range_ahead, botPos 
     #instantiating some stuff 
     g_range_ahead = 1 # anything to start
-    scanner = rospy.Subscriber('scan', LaserScan, scan_callback)
-    odom = rospy.Subscriber('/odom', Odometry, odom_callback )
-    cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=1)
+    rospy.Subscriber('scan', LaserScan, scan_callback)
+    rospy.Subscriber('/odom', Odometry, odom_callback )
+    rospy.Publisher('cmd_vel', Twist, queue_size=1)
     rospy.init_node('bug2')
-
 
     print(botPos)
     print(yaw)
-
     
     rate = rospy.Rate(20)
     while not rospy.is_shutdown():
@@ -115,7 +101,7 @@ def main():
             cmd_vel.publish(twist)
             print(botPos)
             print(yaw)
-            print("range ahead gives: " + str( g_range_ahead))
+            print("range ahead gives: " + str(g_range_ahead))
             if g_range_ahead > 0.2 and g_range_ahead < .5:
                 state = 1
 
@@ -127,10 +113,8 @@ def main():
                     twist = Twist()
                     twist.angular.z = 1
                     cmd_vel.publish(twist)
-
-            
-                
-            #move forard until closer
+                            
+            #move forward until closer
             for i in range(0,3):
                 twist = Twist()
                 twist.linear.x = 1
