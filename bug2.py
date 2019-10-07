@@ -26,7 +26,7 @@ def odom_callback(msg):
 
 '''
 def odom_callback(msg):
-    global botPos_, yaw_
+    global botPos, yaw_
 
     # position
     botPos = msg.pose.pose.position
@@ -91,7 +91,7 @@ count_state_time_ = 0 # seconds the robot is in a state
 count_loop_ = 0
 
 def main():
-    global state, count_loop_, count_state_time_, g_range_ahead 
+    global state, count_loop_, count_state_time_, g_range_ahead, botPos 
     #instantiating some stuff 
     g_range_ahead = 1 # anything to start
     scanner = rospy.Subscriber('scan', LaserScan, scan_callback)
@@ -116,17 +116,39 @@ def main():
             print(botPos)
             print(yaw)
             print("range ahead gives: " + str( g_range_ahead))
-            if g_range_ahead > 0.2 and g_range_ahead < 1:
+            if g_range_ahead > 0.2 and g_range_ahead < .5:
                 state = 1
 
         elif state == 1:# we do the wall crawling
-            twist = Twist()
-            twist.angular.z = 1
-            cmd_vel.publish(twist)
-            print(botPos)
-            print("yaw is: " + str(yaw))
+            #turn to the right until object is no longer spotted
+            if(g_range_ahead <1):
+                while(g_range_ahead < 1):
+                    print("range ahead: " + str(g_range_ahead))
+                    twist = Twist()
+                    twist.angular.z = 1
+                    cmd_vel.publish(twist)
 
-            if g_range_ahead > 1:
+            
+                
+            #move forard until closer
+            for i in range(0,3):
+                twist = Twist()
+                twist.linear.x = 1
+                cmd_vel.publish(twist)
+                print(botPos)
+                print("range ahead: " + str(g_range_ahead))
+                print("yaw is: " + str(yaw))
+
+            #to turn right to find a wall if at a corner
+            if(g_range_ahead >1):
+                while(g_range_ahead > 1):
+                    print("range ahead: " + str(g_range_ahead))
+                    twist = Twist()
+                    twist.angular.z = -1
+                    cmd_vel.publish(twist)
+
+            #puts us back to following mline 
+            if distance_to_line(botPos) > -.2 or distance_to_line(botPos) < .2:
                 state = 0
         
         count_loop_ = count_loop_ + 1
