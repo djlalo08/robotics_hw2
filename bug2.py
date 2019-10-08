@@ -133,6 +133,11 @@ def main():
             #puts us back to following mline 
             if distance_to_line(botPos) > -.2 or distance_to_line(botPos) < .2:
                 state = 0
+#                state = 2
+                
+#        elif state == 2:#turn back to face x-axis
+#            twist.angular.z = -yaw
+            
         
         cmd_vel.publish(twist)
         
